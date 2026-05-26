@@ -15,11 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "SpendLens",
-  description: "See where your AI budget disappears",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -38,3 +33,21 @@ export default function RootLayout({
     </html>
   );
 }
+
+export const metadata: Metadata = {
+  title: "SpendLens",
+  description: "See where your AI budget disappears",
+
+  openGraph: {
+    title: "SpendLens",
+    description: "Audit your AI stack and reduce wasted spend.",
+    images: ["/og-image.png"],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "SpendLens",
+    description: "Audit your AI stack and reduce wasted spend.",
+    images: ["/og-image.png"],
+  },
+};
