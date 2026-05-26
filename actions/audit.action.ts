@@ -24,7 +24,7 @@ export async function getAuditById(auditId: string) {
     const audit = await Audit.findById(auditId).lean();
 
     if (!audit) {
-      throw new Error("Audit not found");
+      return null;
     }
 
     return JSON.parse(JSON.stringify(audit));
