@@ -1,5 +1,3 @@
-// models/audit.model.ts
-
 import { model, models, Schema, type InferSchemaType } from "mongoose";
 
 const ToolSchema = new Schema(
