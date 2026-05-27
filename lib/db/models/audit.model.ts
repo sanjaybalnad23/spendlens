@@ -57,12 +57,6 @@ const RecommendationSchema = new Schema(
 
 const AuditSchema = new Schema(
   {
-    email: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-
     useCase: {
       type: String,
       required: true,
@@ -95,6 +89,11 @@ const AuditSchema = new Schema(
     recommendations: {
       type: [RecommendationSchema],
       required: true,
+    },
+
+    aiSummary: {
+      type: String,
+      trim: true,
     },
   },
   {

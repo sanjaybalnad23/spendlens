@@ -1,9 +1,29 @@
 "use server";
 
 import { connectToDatabase } from "@/lib/db/db";
-import { Audit, type TAudit } from "@/lib/db/models/audit.model";
+import { Audit } from "@/lib/db/models/audit.model";
 
-export async function createAudit(data: TAudit) {
+export type CreateAuditInput = {
+  useCase: "coding" | "research" | "mixed" | "data" | "writing";
+  teamSize: number;
+  toolsUsed: {
+    tool: string;
+    plan: string;
+    seats: number;
+    monthlySpend: number;
+  }[];
+  totalSavings: number;
+  totalAnnualSavings: number;
+  recommendations: {
+    action: "optimal" | "alternative" | "downgrade" | "remove" | "consolidate";
+    reason: string;
+    recommendedTool?: string;
+    recommendedPlan?: string;
+  }[];
+  aiSummary?: string;
+};
+
+export async function createAudit(data: CreateAuditInput) {
   try {
     await connectToDatabase();
 

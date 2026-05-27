@@ -35,6 +35,7 @@ export default function RootLayout({
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
   title: "SpendLens",
   description: "See where your AI budget disappears",
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { connectToDatabase } from "@/lib/db/db";
-import { Lead, type TLead } from "@/lib/db/models/lead.model";
+import { Lead } from "@/lib/db/models/lead.model";
 
 export type CreateLeadInput = {
   name: string;
