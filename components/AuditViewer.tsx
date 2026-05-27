@@ -19,14 +19,38 @@ export default function AuditViewer(audit: AuditViewerProps) {
     };
   }, []);
 
+  const handleShare = () => {
+    navigator.share({
+      title: "SpendLens Audit",
+      text: "Check out my AI stack audit",
+      url: window.location.href,
+    });
+  };
+
   return (
     <>
       {isOpen && <LeadCaptureModal setIsOpen={setIsOpen} />}
       <section className="min-h-screen bg-[#07111f] text-white px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <div className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300 mb-6">
-              Audit Report
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300">
+                Audit Report
+              </div>
+
+              {
+                // If browser supports native sharing api
+                "share" in navigator && (
+                  <button
+                    onClick={handleShare}
+                    type="button"
+                    className=" inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-white backdrop-blur-xl transition-all hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-emerald-300"
+                    aria-label="Share audit report"
+                  >
+                    Share Audit
+                  </button>
+                )
+              }
             </div>
 
             <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
