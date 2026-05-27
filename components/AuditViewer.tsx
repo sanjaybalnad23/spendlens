@@ -4,11 +4,13 @@ import { TAudit } from "@/lib/db/models/audit.model";
 import { useEffect, useState } from "react";
 import LeadCaptureModal from "./LeadCaptureModel";
 import ReactMarkdown from "react-markdown";
+import CredexModal from "./CredexModel";
 
 type AuditViewerProps = TAudit;
 
 export default function AuditViewer(audit: AuditViewerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isHighSavings = audit.totalSavings >= 500;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -30,7 +32,8 @@ export default function AuditViewer(audit: AuditViewerProps) {
 
   return (
     <>
-      {isOpen && <LeadCaptureModal setIsOpen={setIsOpen} />}
+      {isOpen && !isHighSavings && <LeadCaptureModal setIsOpen={setIsOpen} />}
+      {isOpen && isHighSavings && <CredexModal setIsOpen={setIsOpen} />}
       <section className="min-h-screen bg-[#07111f] text-white px-6 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">

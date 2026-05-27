@@ -1,646 +1,727 @@
 import { AuditRule } from "./types";
 
-const getAdoptionRatio = (seats: number, teamSize: number) => {
-  if (teamSize <= 0) {
-    return 1;
-  }
-
-  return seats / teamSize;
-};
-
 export const rules: AuditRule[] = [
   // ─── DOWNGRADE RULES ────────────────────────────────────────────────────────
 
   // 1
   {
-    id: "chatgpt-business-small-team",
-
+    id: "chatgpt-business-low-adoption",
     priority: 100,
-
     condition(context) {
-      return context.toolsUsed.some((tool) => {
-        const adoptionRatio = getAdoptionRatio(tool.seats, context.teamSize);
-
-        return (
-          tool.tool === "chatgpt" &&
-          tool.plan === "business" &&
-          context.teamSize <= 5 &&
-          adoptionRatio >= 0.8
-        );
-      });
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "chatgpt" && t.plan === "business",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.3 && context.teamSize < 50;
     },
-
     calculateSavings(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "chatgpt" && tool.plan === "business",
+        (t) => t.tool === "chatgpt" && t.plan === "business",
       );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 20 * tool.seats);
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "chatgpt" && tool.plan === "business",
+        (t) => t.tool === "chatgpt" && t.plan === "business",
       )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 20 * tool.seats);
-
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
         action: "downgrade",
         recommendedTool: "chatgpt",
         recommendedPlan: "plus",
-        reason: `ChatGPT Business is fully adopted, but a ${context.teamSize}-person team may not require admin and organization features. ChatGPT Plus could save $${savings}/mo.`,
+        reason: `ChatGPT Business is provisioned for ${tool.seats} seats but your team has ${context.teamSize} people — only ${adoptionRatio}% adoption. Plus at $20/seat covers the same core workflows and saves $${savings}/mo.`,
       };
     },
   },
 
   // 2
   {
-    id: "cursor-business-small-team",
-
-    priority: 99,
-
+    id: "chatgpt-business-small-org",
+    priority: 95,
     condition(context) {
-      return context.toolsUsed.some((tool) => {
-        const adoptionRatio = getAdoptionRatio(tool.seats, context.teamSize);
-
-        return (
-          tool.tool === "cursor" &&
-          tool.plan === "business" &&
-          context.teamSize <= 5 &&
-          adoptionRatio >= 0.8
-        );
-      });
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "chatgpt" && t.plan === "business",
+      );
+      if (!tool) return false;
+      return context.teamSize <= 5;
     },
-
     calculateSavings(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "cursor" && tool.plan === "business",
+        (t) => t.tool === "chatgpt" && t.plan === "business",
       );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 20 * tool.seats);
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "cursor" && tool.plan === "business",
+        (t) => t.tool === "chatgpt" && t.plan === "business",
       )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 20 * tool.seats);
-
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
         action: "downgrade",
-        recommendedTool: "cursor",
-        recommendedPlan: "pro",
-        reason: `Cursor Business is heavily adopted, but a ${context.teamSize}-person engineering team may not require organization-level controls. Cursor Pro could save $${savings}/mo.`,
+        recommendedTool: "chatgpt",
+        recommendedPlan: "plus",
+        reason: `ChatGPT Business adds admin and compliance features rarely needed at ${context.teamSize} people. Plus at $20/seat is sufficient and saves $${savings}/mo.`,
       };
     },
   },
 
   // 3
   {
-    id: "claude-max-small-team",
-
-    priority: 98,
-
+    id: "cursor-business-low-adoption",
+    priority: 94,
     condition(context) {
-      return context.toolsUsed.some((tool) => {
-        const adoptionRatio = getAdoptionRatio(tool.seats, context.teamSize);
-
-        return (
-          tool.tool === "claude" &&
-          tool.plan === "max" &&
-          context.teamSize <= 3 &&
-          adoptionRatio >= 0.8
-        );
-      });
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "cursor" && t.plan === "business",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.3 && context.teamSize < 50;
     },
-
     calculateSavings(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "claude" && tool.plan === "max",
+        (t) => t.tool === "cursor" && t.plan === "business",
       );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 20 * tool.seats);
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "claude" && tool.plan === "max",
+        (t) => t.tool === "cursor" && t.plan === "business",
       )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 20 * tool.seats);
-
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
         action: "downgrade",
-        recommendedTool: "claude",
+        recommendedTool: "cursor",
         recommendedPlan: "pro",
-        reason: `Claude Max is heavily adopted, but a ${context.teamSize}-person team may not require premium usage limits. Claude Pro could save $${savings}/mo.`,
+        reason: `Cursor Business is at ${adoptionRatio}% team adoption. SSO and admin controls at $40/seat are hard to justify at this scale. Pro at $20/seat saves $${savings}/mo.`,
       };
     },
   },
 
   // 4
   {
-    id: "gemini-ultra-small-team",
-
-    priority: 97,
-
+    id: "cursor-business-small-org",
+    priority: 90,
     condition(context) {
-      return context.toolsUsed.some((tool) => {
-        const adoptionRatio = getAdoptionRatio(tool.seats, context.teamSize);
-
-        return (
-          tool.tool === "gemini" &&
-          tool.plan === "ultra" &&
-          context.teamSize <= 3 &&
-          adoptionRatio >= 0.8
-        );
-      });
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "cursor" && t.plan === "business",
+      );
+      if (!tool) return false;
+      return context.teamSize <= 5;
     },
-
     calculateSavings(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "gemini" && tool.plan === "ultra",
+        (t) => t.tool === "cursor" && t.plan === "business",
       );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 20 * tool.seats);
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "gemini" && tool.plan === "ultra",
+        (t) => t.tool === "cursor" && t.plan === "business",
       )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 20 * tool.seats);
-
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
         action: "downgrade",
-        recommendedTool: "gemini",
+        recommendedTool: "cursor",
         recommendedPlan: "pro",
-        reason: `Gemini Ultra is heavily adopted, but a ${context.teamSize}-person team may not require ultra-tier usage limits. Gemini Pro could save $${savings}/mo.`,
+        reason: `Cursor Business at $40/seat adds org-level controls not needed for a ${context.teamSize}-person team. Pro at $20/seat has identical model access and saves $${savings}/mo.`,
       };
     },
   },
 
   // 5
   {
-    id: "windsurf-teams-small-team",
-
-    priority: 96,
-
+    id: "claude-max-low-adoption",
+    priority: 88,
     condition(context) {
-      return context.toolsUsed.some((tool) => {
-        const adoptionRatio = getAdoptionRatio(tool.seats, context.teamSize);
-
-        return (
-          tool.tool === "windsurf" &&
-          tool.plan === "teams" &&
-          context.teamSize <= 5 &&
-          adoptionRatio >= 0.8
-        );
-      });
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "max",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.25;
     },
-
     calculateSavings(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "windsurf" && tool.plan === "teams",
+        (t) => t.tool === "claude" && t.plan === "max",
       );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 20 * tool.seats);
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
       const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "windsurf" && tool.plan === "teams",
+        (t) => t.tool === "claude" && t.plan === "max",
       )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 20 * tool.seats);
-
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
         action: "downgrade",
-        recommendedTool: "windsurf",
+        recommendedTool: "claude",
         recommendedPlan: "pro",
-        reason: `Windsurf Teams is heavily adopted, but a ${context.teamSize}-person team may not require organization-level features. Windsurf Pro could save $${savings}/mo.`,
+        reason: `Claude Max at $100/seat is provisioned for ${tool.seats} of ${context.teamSize} team members (${adoptionRatio}% adoption). Max is designed for power users with very high message volume. Pro at $20/seat saves $${savings}/mo.`,
       };
     },
   },
 
-  // ─── REMOVE RULES ───────────────────────────────────────────────────────────
-
   // 6
   {
-    id: "cursor-copilot-overlap",
-
-    priority: 95,
-
+    id: "claude-max-small-org",
+    priority: 85,
     condition(context) {
-      const hasCursor = context.toolsUsed.some(
-        (tool) => tool.tool === "cursor",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "max",
       );
-
-      const hasCopilot = context.toolsUsed.some(
-        (tool) => tool.tool === "copilot",
-      );
-
-      return context.useCase === "coding" && hasCursor && hasCopilot;
+      if (!tool) return false;
+      return context.teamSize <= 5;
     },
-
     calculateSavings(context) {
-      const copilot = context.toolsUsed.find((tool) => tool.tool === "copilot");
-
-      return copilot?.monthlySpend || 0;
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "max",
+      );
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
-      const copilot = context.toolsUsed.find(
-        (tool) => tool.tool === "copilot",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "max",
       )!;
-
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
-        action: "remove",
-        recommendedTool: "cursor",
-        reason: `Cursor already overlaps heavily with Copilot for coding workflows. Removing Copilot could save $${copilot.monthlySpend}/mo.`,
+        action: "downgrade",
+        recommendedTool: "claude",
+        recommendedPlan: "pro",
+        reason: `Claude Max at $100/seat is rarely justified for teams under 5 unless usage is exceptionally high. Pro at $20/seat covers standard workflows and saves $${savings}/mo.`,
       };
     },
   },
 
   // 7
   {
-    id: "cursor-windsurf-overlap",
-
-    priority: 94,
-
+    id: "gemini-ultra-low-adoption",
+    priority: 83,
     condition(context) {
-      const hasCursor = context.toolsUsed.some(
-        (tool) => tool.tool === "cursor",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
       );
-
-      const hasWindsurf = context.toolsUsed.some(
-        (tool) => tool.tool === "windsurf",
-      );
-
-      return context.useCase === "coding" && hasCursor && hasWindsurf;
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.25;
     },
-
     calculateSavings(context) {
-      const windsurf = context.toolsUsed.find(
-        (tool) => tool.tool === "windsurf",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
       );
-
-      return windsurf?.monthlySpend || 0;
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
-      const windsurf = context.toolsUsed.find(
-        (tool) => tool.tool === "windsurf",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
       )!;
-
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
-        action: "remove",
-        recommendedTool: "cursor",
-        reason: `Cursor and Windsurf solve very similar AI coding workflows. Removing Windsurf could save $${windsurf.monthlySpend}/mo.`,
+        action: "downgrade",
+        recommendedTool: "gemini",
+        recommendedPlan: "pro",
+        reason: `Gemini Ultra at $100/seat is at ${adoptionRatio}% team adoption. Pro at $20/seat covers research and writing workflows for most teams and saves $${savings}/mo.`,
       };
     },
   },
 
   // 8
   {
-    id: "three-coding-tools-overlap",
-
-    priority: 93,
-
+    id: "gemini-ultra-small-org",
+    priority: 80,
     condition(context) {
-      const codingTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "cursor" ||
-          tool.tool === "copilot" ||
-          tool.tool === "windsurf",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
       );
-
-      return context.useCase === "coding" && codingTools.length >= 3;
+      if (!tool) return false;
+      return context.teamSize <= 5;
     },
-
     calculateSavings(context) {
-      const codingTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "cursor" ||
-          tool.tool === "copilot" ||
-          tool.tool === "windsurf",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
       );
-
-      const cheapest = [...codingTools].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
-      return cheapest?.monthlySpend || 0;
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
-      const codingTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "cursor" ||
-          tool.tool === "copilot" ||
-          tool.tool === "windsurf",
-      );
-
-      const totalSpend = codingTools.reduce(
-        (acc, tool) => acc + tool.monthlySpend,
-        0,
-      );
-
-      const cheapest = [...codingTools].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "ultra",
+      )!;
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
-        action: "consolidate",
-        reason: `You're spending $${totalSpend}/mo across overlapping AI coding assistants. Consolidating to one primary coding tool could save at least $${cheapest.monthlySpend}/mo.`,
+        action: "downgrade",
+        recommendedTool: "gemini",
+        recommendedPlan: "pro",
+        reason: `Gemini Ultra at $100/seat is unlikely to be justified for a ${context.teamSize}-person team. Pro at $20/seat is sufficient for most research and writing needs and saves $${savings}/mo.`,
       };
     },
   },
 
   // 9
   {
-    id: "three-chat-tools-overlap",
-
-    priority: 92,
-
+    id: "windsurf-teams-low-adoption",
+    priority: 78,
     condition(context) {
-      const chatTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "chatgpt" ||
-          tool.tool === "claude" ||
-          tool.tool === "gemini",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
       );
-
-      return chatTools.length >= 3;
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.3 && context.teamSize < 50;
     },
-
     calculateSavings(context) {
-      const chatTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "chatgpt" ||
-          tool.tool === "claude" ||
-          tool.tool === "gemini",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
       );
-
-      const cheapest = [...chatTools].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
-      return cheapest?.monthlySpend || 0;
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
-      const chatTools = context.toolsUsed.filter(
-        (tool) =>
-          tool.tool === "chatgpt" ||
-          tool.tool === "claude" ||
-          tool.tool === "gemini",
-      );
-
-      const totalSpend = chatTools.reduce(
-        (acc, tool) => acc + tool.monthlySpend,
-        0,
-      );
-
-      const cheapest = [...chatTools].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
+      )!;
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
-        action: "consolidate",
-        reason: `You're spending $${totalSpend}/mo across overlapping conversational AI tools. Consolidating tools could save at least $${cheapest.monthlySpend}/mo.`,
+        action: "downgrade",
+        recommendedTool: "windsurf",
+        recommendedPlan: "pro",
+        reason: `Windsurf Teams is at ${adoptionRatio}% adoption. Org management features at $40/seat are not cost-effective at this usage level. Pro at $20/seat saves $${savings}/mo.`,
       };
     },
   },
 
   // 10
   {
-    id: "solo-user-overstacked",
-
-    priority: 91,
-
+    id: "windsurf-teams-small-org",
+    priority: 75,
     condition(context) {
-      return context.teamSize === 1 && context.toolsUsed.length >= 3;
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
+      );
+      if (!tool) return false;
+      return context.teamSize <= 5;
     },
-
     calculateSavings(context) {
-      const cheapest = [...context.toolsUsed].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
-      return cheapest?.monthlySpend || 0;
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
+      );
+      if (!tool) return 0;
+      return tool.monthlySpend - 20 * tool.seats;
     },
-
     getRecommendation(context) {
-      const cheapest = [...context.toolsUsed].sort(
-        (a, b) => a.monthlySpend - b.monthlySpend,
-      )[0];
-
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "windsurf" && t.plan === "teams",
+      )!;
+      const savings = tool.monthlySpend - 20 * tool.seats;
       return {
-        action: "consolidate",
-        reason: `Solo workflows usually don't require ${context.toolsUsed.length} separate AI subscriptions. Consolidation could save at least $${cheapest.monthlySpend}/mo.`,
+        action: "downgrade",
+        recommendedTool: "windsurf",
+        recommendedPlan: "pro",
+        reason: `Windsurf Teams at $40/seat adds org-level controls unnecessary for ${context.teamSize} developers. Pro at $20/seat is functionally equivalent and saves $${savings}/mo.`,
       };
     },
   },
 
-  // ─── ALTERNATIVE RULES ──────────────────────────────────────────────────────
-
   // 11
   {
-    id: "coding-without-coding-editor",
-
-    priority: 90,
-
+    id: "copilot-proplus-non-coding",
+    priority: 73,
     condition(context) {
-      const hasCodingEditor = context.toolsUsed.some(
-        (tool) =>
-          tool.tool === "cursor" ||
-          tool.tool === "copilot" ||
-          tool.tool === "windsurf",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
       );
-
-      return context.useCase === "coding" && !hasCodingEditor;
+      if (!tool) return false;
+      return context.useCase !== "coding";
     },
-
-    calculateSavings() {
-      return 0;
+    calculateSavings(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
+      );
+      if (!tool) return 0;
+      return tool.monthlySpend - 10 * tool.seats;
     },
-
-    getRecommendation() {
+    getRecommendation(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
+      )!;
+      const savings = tool.monthlySpend - 10 * tool.seats;
       return {
-        action: "alternative",
-        recommendedTool: "cursor",
+        action: "downgrade",
+        recommendedTool: "copilot",
         recommendedPlan: "pro",
-        reason: `Your stack focuses on coding workflows but lacks a dedicated AI coding editor. Cursor Pro is purpose-built for engineering workflows.`,
+        reason: `Copilot Pro+ at $39/seat is built for heavy coding agent workflows. Your primary use case is ${context.useCase} — Pro at $10/seat is sufficient and saves $${savings}/mo.`,
       };
     },
   },
 
   // 12
   {
-    id: "research-without-gemini",
-
-    priority: 89,
-
+    id: "copilot-proplus-low-adoption",
+    priority: 70,
     condition(context) {
-      const hasGemini = context.toolsUsed.some(
-        (tool) => tool.tool === "gemini",
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
       );
-
-      return context.useCase === "research" && !hasGemini;
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return adoptionRatio < 0.2;
     },
-
-    calculateSavings() {
-      return 0;
+    calculateSavings(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
+      );
+      if (!tool) return 0;
+      return tool.monthlySpend - 10 * tool.seats;
     },
-
-    getRecommendation() {
+    getRecommendation(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "copilot" && t.plan === "proPlus",
+      )!;
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      const savings = tool.monthlySpend - 10 * tool.seats;
       return {
-        action: "alternative",
-        recommendedTool: "gemini",
+        action: "downgrade",
+        recommendedTool: "copilot",
         recommendedPlan: "pro",
-        reason: `Gemini Pro integrates strongly with research and document workflows.`,
+        reason: `Copilot Pro+ is provisioned for ${tool.seats} of ${context.teamSize} team members (${adoptionRatio}% adoption). Pro at $10/seat covers most coding workflows and saves $${savings}/mo.`,
       };
     },
   },
 
+  // ─── REMOVE RULES ───────────────────────────────────────────────────────────
+
   // 13
   {
-    id: "writing-without-claude",
-
-    priority: 88,
-
+    id: "redundant-copilot-with-cursor",
+    priority: 95,
     condition(context) {
-      const hasClaude = context.toolsUsed.some(
-        (tool) => tool.tool === "claude",
-      );
-
-      return context.useCase === "writing" && !hasClaude;
+      const hasCursor = context.toolsUsed.some((t) => t.tool === "cursor");
+      const hasCopilot = context.toolsUsed.some((t) => t.tool === "copilot");
+      return hasCursor && hasCopilot;
     },
-
-    calculateSavings() {
-      return 0;
+    calculateSavings(context) {
+      const copilot = context.toolsUsed.find((t) => t.tool === "copilot");
+      return copilot ? copilot.monthlySpend : 0;
     },
-
-    getRecommendation() {
+    getRecommendation(context) {
+      const copilot = context.toolsUsed.find((t) => t.tool === "copilot")!;
       return {
-        action: "alternative",
-        recommendedTool: "claude",
-        recommendedPlan: "pro",
-        reason: `Claude Pro is particularly strong for long-form writing and editing workflows.`,
+        action: "remove",
+        recommendedTool: "cursor",
+        reason: `Cursor already covers inline completions, chat, and agent workflows — the same value proposition as Copilot. Running both creates redundant spend. Dropping Copilot saves $${copilot.monthlySpend}/mo.`,
       };
     },
   },
 
   // 14
   {
-    id: "cursor-business-to-copilot-pro",
-
-    priority: 87,
-
+    id: "redundant-windsurf-with-cursor",
+    priority: 92,
     condition(context) {
-      return context.toolsUsed.some(
-        (tool) =>
-          tool.tool === "cursor" &&
-          tool.plan === "business" &&
-          context.useCase !== "coding",
-      );
+      const hasCursor = context.toolsUsed.some((t) => t.tool === "cursor");
+      const hasWindsurf = context.toolsUsed.some((t) => t.tool === "windsurf");
+      return hasCursor && hasWindsurf;
     },
-
     calculateSavings(context) {
-      const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "cursor" && tool.plan === "business",
-      );
-
-      if (!tool) {
-        return 0;
-      }
-
-      return Math.max(0, tool.monthlySpend - 10 * tool.seats);
+      const windsurf = context.toolsUsed.find((t) => t.tool === "windsurf");
+      return windsurf ? windsurf.monthlySpend : 0;
     },
-
     getRecommendation(context) {
-      const tool = context.toolsUsed.find(
-        (tool) => tool.tool === "cursor" && tool.plan === "business",
-      )!;
-
-      const savings = Math.max(0, tool.monthlySpend - 10 * tool.seats);
-
+      const windsurf = context.toolsUsed.find((t) => t.tool === "windsurf")!;
       return {
-        action: "alternative",
-        recommendedTool: "copilot",
-        recommendedPlan: "pro",
-        reason: `Cursor Business may be excessive for ${context.useCase} workflows. Copilot Pro could provide lighter assistance while saving $${savings}/mo.`,
+        action: "remove",
+        recommendedTool: "cursor",
+        reason: `Cursor and Windsurf are near-identical AI coding editors with overlapping model access and workflows. Consolidating to Cursor saves $${windsurf.monthlySpend}/mo.`,
       };
     },
   },
 
-  // ─── STACK HEALTH RULES ─────────────────────────────────────────────────────
+  // ─── CONSOLIDATE RULES ──────────────────────────────────────────────────────
 
   // 15
   {
-    id: "high-spend-low-adoption-stack",
-
-    priority: 86,
-
+    id: "multiple-chat-tools-overlap",
+    priority: 68,
     condition(context) {
-      const totalSpend = context.toolsUsed.reduce(
-        (acc, tool) => acc + tool.monthlySpend,
-        0,
+      const chatTools = context.toolsUsed.filter((t) =>
+        ["chatgpt", "claude", "gemini"].includes(t.tool),
       );
-
-      const averageAdoption =
-        context.toolsUsed.reduce(
-          (acc, tool) => acc + getAdoptionRatio(tool.seats, context.teamSize),
-          0,
-        ) / context.toolsUsed.length;
-
-      return totalSpend >= 300 && averageAdoption < 0.7;
+      return chatTools.length >= 3;
     },
-
     calculateSavings(context) {
-      const totalSpend = context.toolsUsed.reduce(
-        (acc, tool) => acc + tool.monthlySpend,
-        0,
+      const chatTools = context.toolsUsed.filter((t) =>
+        ["chatgpt", "claude", "gemini"].includes(t.tool),
       );
-
-      return Math.round(totalSpend * 0.2);
+      return Math.min(...chatTools.map((t) => t.monthlySpend));
     },
-
     getRecommendation(context) {
-      const totalSpend = context.toolsUsed.reduce(
-        (acc, tool) => acc + tool.monthlySpend,
-        0,
+      const chatTools = context.toolsUsed.filter((t) =>
+        ["chatgpt", "claude", "gemini"].includes(t.tool),
       );
-
-      const savings = Math.round(totalSpend * 0.2);
-
+      const totalSpend = chatTools.reduce((acc, t) => acc + t.monthlySpend, 0);
+      const cheapest = Math.min(...chatTools.map((t) => t.monthlySpend));
       return {
         action: "consolidate",
-        reason: `Your stack costs $${totalSpend}/mo while average adoption across tools remains relatively low. Consolidation could save roughly $${savings}/mo.`,
+        reason: `Your stack includes ChatGPT, Claude, and Gemini — $${totalSpend}/mo across three general-purpose chat tools with heavily overlapping capabilities. Consolidating to two saves at least $${cheapest}/mo.`,
+      };
+    },
+  },
+
+  // 16
+  {
+    id: "multiple-coding-tools-overlap",
+    priority: 65,
+    condition(context) {
+      const codingTools = context.toolsUsed.filter((t) =>
+        ["cursor", "copilot", "windsurf"].includes(t.tool),
+      );
+      return codingTools.length >= 3;
+    },
+    calculateSavings(context) {
+      const codingTools = context.toolsUsed.filter((t) =>
+        ["cursor", "copilot", "windsurf"].includes(t.tool),
+      );
+      return Math.min(...codingTools.map((t) => t.monthlySpend));
+    },
+    getRecommendation(context) {
+      const codingTools = context.toolsUsed.filter((t) =>
+        ["cursor", "copilot", "windsurf"].includes(t.tool),
+      );
+      const totalSpend = codingTools.reduce(
+        (acc, t) => acc + t.monthlySpend,
+        0,
+      );
+      const cheapest = Math.min(...codingTools.map((t) => t.monthlySpend));
+      return {
+        action: "consolidate",
+        reason: `You're running Cursor, Copilot, and Windsurf for $${totalSpend}/mo — three tools serving nearly identical coding workflows. Consolidating to one saves at least $${cheapest}/mo.`,
+      };
+    },
+  },
+
+  // 17
+  {
+    id: "solo-user-many-tools",
+    priority: 60,
+    condition(context) {
+      return context.teamSize === 1 && context.toolsUsed.length >= 3;
+    },
+    calculateSavings(context) {
+      return Math.min(...context.toolsUsed.map((t) => t.monthlySpend));
+    },
+    getRecommendation(context) {
+      const totalSpend = context.toolsUsed.reduce(
+        (acc, t) => acc + t.monthlySpend,
+        0,
+      );
+      const cheapest = Math.min(
+        ...context.toolsUsed.map((t) => t.monthlySpend),
+      );
+      return {
+        action: "consolidate",
+        reason: `As a solo user you're spending $${totalSpend}/mo across ${context.toolsUsed.length} AI tools. Single-person workflows rarely require more than two tools. Trimming the least-used saves at least $${cheapest}/mo.`,
+      };
+    },
+  },
+
+  // 18
+  {
+    id: "high-spend-per-seat",
+    priority: 55,
+    condition(context) {
+      const totalSpend = context.toolsUsed.reduce(
+        (acc, t) => acc + t.monthlySpend,
+        0,
+      );
+      const totalSeats = context.toolsUsed.reduce((acc, t) => acc + t.seats, 0);
+      const spendPerSeat = totalSeats > 0 ? totalSpend / totalSeats : 0;
+      return spendPerSeat > 80 && context.teamSize <= 20;
+    },
+    calculateSavings(context) {
+      const totalSpend = context.toolsUsed.reduce(
+        (acc, t) => acc + t.monthlySpend,
+        0,
+      );
+      return Math.round(totalSpend * 0.2);
+    },
+    getRecommendation(context) {
+      const totalSpend = context.toolsUsed.reduce(
+        (acc, t) => acc + t.monthlySpend,
+        0,
+      );
+      const totalSeats = context.toolsUsed.reduce((acc, t) => acc + t.seats, 0);
+      const spendPerSeat = Math.round(totalSpend / totalSeats);
+      const savings = Math.round(totalSpend * 0.2);
+      return {
+        action: "consolidate",
+        reason: `Your stack averages $${spendPerSeat}/seat/mo across ${totalSeats} seats — above typical for a ${context.teamSize}-person team. Reviewing plan tiers and removing underused tools could save ~$${savings}/mo.`,
+      };
+    },
+  },
+
+  // ─── ALTERNATIVE RULES ──────────────────────────────────────────────────────
+
+  // 19
+  {
+    id: "coding-team-no-dedicated-editor",
+    priority: 50,
+    condition(context) {
+      const hasCodingEditor = context.toolsUsed.some((t) =>
+        ["cursor", "copilot", "windsurf"].includes(t.tool),
+      );
+      return context.useCase === "coding" && !hasCodingEditor;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation() {
+      return {
+        action: "alternative",
+        recommendedTool: "cursor",
+        recommendedPlan: "pro",
+        reason: `Your team's primary use case is coding but your stack has no dedicated AI coding editor. Cursor Pro at $20/seat provides inline completions, multi-file edits, and agent workflows built for engineering teams.`,
+      };
+    },
+  },
+
+  // 20
+  {
+    id: "writing-team-no-claude",
+    priority: 45,
+    condition(context) {
+      const hasClaude = context.toolsUsed.some((t) => t.tool === "claude");
+      return context.useCase === "writing" && !hasClaude;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation() {
+      return {
+        action: "alternative",
+        recommendedTool: "claude",
+        recommendedPlan: "pro",
+        reason: `For writing-focused workflows Claude consistently performs well on tone, long-form coherence, and editing tasks. Claude Pro at $20/seat is worth evaluating against your current stack.`,
+      };
+    },
+  },
+
+  // 21
+  {
+    id: "research-team-no-gemini",
+    priority: 40,
+    condition(context) {
+      const hasGemini = context.toolsUsed.some((t) => t.tool === "gemini");
+      return context.useCase === "research" && !hasGemini;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation() {
+      return {
+        action: "alternative",
+        recommendedTool: "gemini",
+        recommendedPlan: "pro",
+        reason: `For research-heavy workflows Gemini Pro offers native Google Search grounding and strong document analysis. At $20/seat it may complement or replace higher-cost tools in your current stack.`,
+      };
+    },
+  },
+
+  // ─── OPTIMAL RULES ──────────────────────────────────────────────────────────
+
+  // 22
+  {
+    id: "cursor-pro-coding-team-optimal",
+    priority: 20,
+    condition(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "cursor" && t.plan === "pro",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return context.useCase === "coding" && adoptionRatio >= 0.7;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "cursor" && t.plan === "pro",
+      )!;
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      return {
+        action: "optimal",
+        recommendedTool: "cursor",
+        recommendedPlan: "pro",
+        reason: `Cursor Pro at $20/seat with ${adoptionRatio}% team adoption is well-matched to a coding-focused team. Current setup appears reasonably optimized.`,
+      };
+    },
+  },
+
+  // 23
+  {
+    id: "claude-pro-writing-team-optimal",
+    priority: 20,
+    condition(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "pro",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return context.useCase === "writing" && adoptionRatio >= 0.7;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "claude" && t.plan === "pro",
+      )!;
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      return {
+        action: "optimal",
+        recommendedTool: "claude",
+        recommendedPlan: "pro",
+        reason: `Claude Pro at $20/seat with ${adoptionRatio}% adoption is a strong fit for a writing-focused team. Current setup appears reasonably optimized.`,
+      };
+    },
+  },
+
+  // 24
+  {
+    id: "gemini-pro-research-team-optimal",
+    priority: 20,
+    condition(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "pro",
+      );
+      if (!tool) return false;
+      const adoptionRatio = tool.seats / context.teamSize;
+      return context.useCase === "research" && adoptionRatio >= 0.7;
+    },
+    calculateSavings() {
+      return 0;
+    },
+    getRecommendation(context) {
+      const tool = context.toolsUsed.find(
+        (t) => t.tool === "gemini" && t.plan === "pro",
+      )!;
+      const adoptionRatio = Math.round((tool.seats / context.teamSize) * 100);
+      return {
+        action: "optimal",
+        recommendedTool: "gemini",
+        recommendedPlan: "pro",
+        reason: `Gemini Pro at $20/seat with ${adoptionRatio}% adoption is well-suited to a research-focused team. Current setup appears reasonably optimized.`,
       };
     },
   },
