@@ -3,6 +3,7 @@
 import { TAudit } from "@/lib/db/models/audit.model";
 import { useEffect, useState } from "react";
 import LeadCaptureModal from "./LeadCaptureModel";
+import ReactMarkdown from "react-markdown";
 
 type AuditViewerProps = TAudit;
 
@@ -99,6 +100,20 @@ export default function AuditViewer(audit: AuditViewerProps) {
               <h3 className="text-3xl font-black">{audit.toolsUsed.length}</h3>
             </div>
           </div>
+
+          {audit.aiSummary && (
+            <div className="mb-12">
+              <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">
+                <div className="inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300 mb-6">
+                  AI Summary
+                </div>
+
+                <div className=" prose prose-invert max-w-none">
+                  <ReactMarkdown>{audit.aiSummary}</ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid lg:grid-cols-2 gap-8">
             <div className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl">

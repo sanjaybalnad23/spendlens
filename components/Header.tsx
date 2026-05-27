@@ -8,13 +8,15 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-[#07111f]/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="SpendLens"
-            width={220}
-            height={60}
-            className="h-12 w-auto"
-          />
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="SpendLens"
+              width={220}
+              height={60}
+              className="h-12 w-auto"
+            />
+          </Link>
         </div>
 
         <Link

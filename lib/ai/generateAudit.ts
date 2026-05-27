@@ -1,4 +1,6 @@
+"use server";
 import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
 import { AuditEngine } from "@/lib/auditengine/AuditEngine";
 import { rules } from "@/lib/auditengine/rules";
 import type { AuditParams } from "@/lib/auditengine/types";
@@ -13,7 +15,7 @@ export async function generateAudit(
   const engine = new AuditEngine(rules);
   const result = engine.run(params);
   const { text } = await generateText({
-    model: "google/gemini-2.5-flash",
+    model: google("gemini-2.5-flash"),
     system: SYSTEM_PROMPT,
     prompt: `
       Audit Input:
