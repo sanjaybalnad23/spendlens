@@ -2,6 +2,10 @@
 
 SpendLens is an AI SaaS audit platform that analyzes a team’s AI tooling stack, detects optimization opportunities using a deterministic rule engine, estimates monthly/yearly savings, generates an AI-written summary, and produces a shareable audit report page.
 
+## Live Demo
+
+https://spendlens-audit.netlify.app/
+
 ## Project Overview
 
 ### What SpendLens does
