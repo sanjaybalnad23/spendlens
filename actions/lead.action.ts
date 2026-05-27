@@ -3,7 +3,13 @@
 import { connectToDatabase } from "@/lib/db/db";
 import { Lead, type TLead } from "@/lib/db/models/lead.model";
 
-export async function createLead(data: TLead) {
+export type CreateLeadInput = {
+  name: string;
+  email: string;
+  company?: string;
+};
+
+export async function createLead(data: CreateLeadInput) {
   try {
     await connectToDatabase();
 
