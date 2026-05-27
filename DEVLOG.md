@@ -72,3 +72,39 @@
 
 - [ ] Connect audit form to persistence flow
 - [ ] Improve rule coverage and recommendation quality
+
+## 2026-05-27 — Final integration + AI summary stuff
+
+**Done**
+
+- Connected audit form → audit engine → AI summary → MongoDB persistence flow
+- Added shareable audit result pages
+- Added AI-generated summaries using AI SDK + Gemini
+- Built lead capture modal + Credex popup logic
+- Added Open Graph metadata + social preview support
+- Added markdown rendering for AI summaries
+- Added localStorage-based form persistence
+- Wrote README, TESTS, PROMPTS, REFLECTION and other assignment docs
+
+**Learnings / Challenges**
+
+- Audit engine logic was way harder than expected
+- Spent a lot of time researching rule-engine architecture and recommendation heuristics
+- Explored libraries like json-rules-engine but ended up building custom logic instead
+- Realized procurement/savings recommendations are extremely subjective and context dependent
+- Even now the engine is still inaccurate in many situations honestly 😭
+- UI ended up becoming the easiest part near the end
+
+**Blockers / Problems**
+
+- Time constraints near the end
+- Some parts of codebase could definitely be cleaner/readable with more time
+- Did not get enough time for proper automated testing
+- Rule quality still needs much more refinement
+
+**Next**
+
+- [ ] Improve audit recommendation accuracy
+- [ ] Add proper automated tests
+- [ ] Improve code readability/refactoring
+- [ ] Better caching and optimization
